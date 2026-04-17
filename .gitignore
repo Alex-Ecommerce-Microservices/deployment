@@ -1,0 +1,8 @@
+# Chặn các file nhạy cảm
+.DS_Store
+.env
+certs/*.p12
+certs/*.jks
+
+# Chặn dữ liệu thực tế của MySQL (vì nó rất nặng và không cần thiết trên Git)
+mysql-data/

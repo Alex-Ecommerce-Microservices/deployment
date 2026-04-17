@@ -1,0 +1,90 @@
+
+version: '3.8'
+
+services:
+  # 1. Database MySQL
+  mysql-db:
+    image: mysql:8.0
+    container_name: mysql-db
+    restart: always
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_DATABASE: full-stack-ecommerce
+      MYSQL_USER: ecommerceapp
+      MYSQL_PASSWORD: ecommerceapp
+      MYSQL_ROOT_PASSWORD: rootpassword
+
+    volumes:
+      # Ánh xạ file sql vào thư mục khởi tạo tự động của MySQL
+      - ./mysql-data/init.sql:/docker-entrypoint-initdb.d/init.sql
+      # (Tùy chọn) Giữ dữ liệu không bị mất khi xóa container
+      - mysql_db_data:/var/lib/mysql
+    networks:
+      - spring-cloud-net
+
+  # 2. Discovery Service
+  discovery-service:
+    image: caohoa/discovery-service:latest
+    restart: always
+    ports:
+      - "8761:8761"
+    networks:
+      - spring-cloud-net
+
+  # 3. Monolith Service
+  monolith-service:
+    image: caohoa/monolith-service:latest
+    restart: always
+    ports:
+      - "8081:8081"
+    environment:
+      # Ghi đè URL Database để trỏ tới container mysql-db
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-db:3306/full-stack-ecommerce
+      SPRING_DATASOURCE_USERNAME: ecommerceapp
+      SPRING_DATASOURCE_PASSWORD: ecommerceapp
+      # Ghi đè URL Eureka để trỏ tới container discovery-service
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-service:8761/eureka/
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY}
+    
+    depends_on:
+      - mysql-db
+      - discovery-service
+    networks:
+      - spring-cloud-net
+
+  # 4. API Gateway
+  api-gateway:
+    image: caohoa/api-gateway:latest
+    ports:
+      - "8443:8443"
+    volumes:
+      - ./certs/alexvo-keystore.p12:/app/certs/keystore.p12 # Gắn file bên ngoài vào
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-service:8761/eureka/
+      # Ghi đè đường dẫn để Spring Boot tìm file ở thư mục ngoài thay vì classpath
+      SERVER_SSL_KEY_STORE: file:/app/certs/keystore.p12
+      SERVER_SSL_KEY_STORE_PASSWORD: ${SERVER_SSL_KEY_STORE_PASSWORD}
+      
+      
+    depends_on:
+      - discovery-service
+    networks:
+      - spring-cloud-net
+
+# 5. watchover
+  watchtower:
+    image: containrrr/watchtower
+    container_name: watchtower
+    restart: always
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: --interval 30 # Kiểm tra mỗi 30 giây
+
+networks:
+  spring-cloud-net:
+    driver: bridge
+
+# Thêm khai báo volume ở cuối file nếu bạn dùng dòng mysql_db_data ở trên
+volumes:
+  mysql_db_data:
