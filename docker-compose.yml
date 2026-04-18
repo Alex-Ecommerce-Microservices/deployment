@@ -66,7 +66,6 @@ services:
       SERVER_SSL_KEY_STORE: file:/app/certs/keystore.p12
       SERVER_SSL_KEY_STORE_PASSWORD: ${SERVER_SSL_KEY_STORE_PASSWORD}
       
-      
     depends_on:
       - discovery-service
     networks:
@@ -79,7 +78,19 @@ services:
     restart: always
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-    command: --interval 30 # Kiểm tra mỗi 30 giây
+    environment:
+      - WATCHTOWER_CLEANUP=true
+      - WATCHTOWER_POLL_INTERVAL=30
+
+  angular-frontend:
+    image: caohoa/angular-frontend:latest
+    container_name: angular-frontend
+    restart: always
+    ports:
+      - "80:80" 
+      - "443:443" # Open HTTPS
+    depends_on:
+      - api-gateway
 
 networks:
   spring-cloud-net:
