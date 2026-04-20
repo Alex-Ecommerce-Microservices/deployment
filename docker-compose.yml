@@ -57,7 +57,7 @@ services:
     # Port 8081 không cần mở ra ngoài nếu đã có API Gateway
     environment:
       SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL}
-      SPRING_DATASOURCE_USERNAME: ${DB_NAME}
+      SPRING_DATASOURCE_USERNAME: ${DB_USER}
       SPRING_DATASOURCE_PASSWORD: ${DB_PASS}
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-service:8761/eureka/
       STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY}
