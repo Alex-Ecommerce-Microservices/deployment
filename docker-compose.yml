@@ -56,6 +56,7 @@ services:
     restart: always
     # Port 8081 không cần mở ra ngoài nếu đã có API Gateway
     environment:
+      SPRING_PROFILES_ACTIVE: prod
       SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL}
       SPRING_DATASOURCE_USERNAME: ${DB_USER}
       SPRING_DATASOURCE_PASSWORD: ${DB_PASS}
@@ -82,6 +83,7 @@ services:
     volumes:
       - ./certs/alexvo-keystore.p12:/app/certs/keystore.p12
     environment:
+      SPRING_PROFILES_ACTIVE: prod
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-service:8761/eureka/
       SERVER_SSL_KEY_STORE: "file:/app/certs/keystore.p12"
       SERVER_SSL_KEY_STORE_PASSWORD: ${SERVER_SSL_KEY_STORE_PASSWORD}
