@@ -110,23 +110,23 @@ services:
           memory: 2G
 
   # 5. Angular Frontend
-  angular-frontend:
-    image: caohoa/angular-frontend:latest
-    container_name: angular-frontend
-    labels:
-      - "com.centurylinklabs.watchtower.enable=true"
-    restart: always
-    ports:
-      - "80:80"
-      - "443:443"
-    depends_on:
-      - api-gateway
-    networks:
-      - spring-cloud-net
-    deploy:
-      resources:
-        limits:
-          memory: 1G
+  # angular-frontend:
+  #   image: caohoa/angular-frontend:latest
+  #   container_name: angular-frontend
+  #   labels:
+  #     - "com.centurylinklabs.watchtower.enable=true"
+  #   restart: always
+  #   ports:
+  #     - "80:80"
+  #     - "443:443"
+  #   depends_on:
+  #     - api-gateway
+  #   networks:
+  #     - spring-cloud-net
+  #   deploy:
+  #     resources:
+  #       limits:
+  #         memory: 1G
 
   # 6. Watchtower (Tự động cập nhật image)
   watchtower:
