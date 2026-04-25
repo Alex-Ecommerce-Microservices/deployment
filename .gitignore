@@ -1,8 +1,42 @@
-# Chặn các file nhạy cảm
-.DS_Store
-.env
-certs/*.p12
-certs/*.jks
+# =================================================================
+# Alex-Ecommerce Deployment GitIgnore
+# =================================================================
 
-# Chặn dữ liệu thực tế của MySQL (vì nó rất nặng và không cần thiết trên Git)
-mysql-data/
+# 1. THÔNG TIN NHẠY CẢM (QUAN TRỌNG NHẤT)
+# Tuyệt đối không đẩy các file chứa mật khẩu, API keys
+.env
+.env.*
+backend/.env
+frontend/.env
+local/mysql-data/
+
+# 2. CHỨNG CHỈ BẢO MẬT (SSL/TLS)
+# Chỉ giữ lại cấu trúc thư mục, không giữ file cert thực tế
+**/certs/*.crt
+**/certs/*.key
+**/certs/*.pem
+**/certs/*.p12
+**/certs/*.jks
+**/ssl-localhost/*.crt
+**/ssl-localhost/*.key
+
+# Loại trừ file .gitkeep nếu bạn muốn giữ thư mục certs trống trên Git
+!**/certs/.gitkeep
+!**/ssl-localhost/.gitkeep
+
+# 3. DOCKER
+# Không lưu các file ghi đè cấu hình local hoặc dữ liệu phát sinh
+docker-compose.override.yml
+*.log
+.docker/
+
+# 4. HỆ ĐIỀU HÀNH (Dành cho máy Mac Mini của bạn)
+.DS_Store
+Thumbs.db
+*.swp
+
+# 5. IDE & TOOLS
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
