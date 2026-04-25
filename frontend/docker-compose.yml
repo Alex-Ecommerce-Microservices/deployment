@@ -8,8 +8,7 @@ services:
     ports:
       - "80:80"     # Để redirect 301 sang 8443
       - "443:443" # Port HTTPS chính trên GCP
-    volumes:
-      - ./certs:/etc/nginx/ssl:ro
+
     networks:
       - frontend-net
 
@@ -20,6 +19,7 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     environment:
+      DOCKER_API_VERSION: 1.41
       WATCHTOWER_LABEL_ENABLE: "true"
       WATCHTOWER_CLEANUP: "true"
       WATCHTOWER_POLL_INTERVAL: 3600
