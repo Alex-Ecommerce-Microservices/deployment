@@ -1,0 +1,40 @@
+name: Deploy Backend to OCI
+
+on:
+  push:
+    branches: [ "main" ] # Tự động chạy khi Hoa push vào branch main của repo deployment
+    paths:
+      - 'backend/**' # Chỉ chạy khi sửa code backend
+      - '.github/workflows/backend-oci.yml' # Khi sửa chính logic deploy của nó
+
+jobs:
+  deploy-backend:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Bước 1: Copy Backend Config to OCI server via SCP
+      - name: Copy Backend Config to OCI
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.OCI_HOST }}
+          username: ${{ secrets.OCI_USER }}
+          key: ${{ secrets.OCI_SSH_KEY }}
+          source: "backend/*"
+          target: "~/alex-deployment/"
+          strip_components: 1
+
+      # Bước 2: Ra lệnh cho Docker Compose cập nhật hệ thống
+      - name: Execute Docker Compose
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.OCI_HOST }}
+          username: ${{ secrets.OCI_USER }}
+          key: ${{ secrets.OCI_SSH_KEY }}
+          script: |
+            cd ~/alex-deployment
+            # Pull các image mới nhất từ Docker Hub (Discovery, Gateway, Monolith, Angular)
+            docker compose pull
+            # Khởi động lại các container với cấu hình mới, dọn dẹp các service cũ bị thừa
+            docker compose up -d --remove-orphans

@@ -1,0 +1,32 @@
+services:
+  angular-frontend:
+    image: caohoa/angular-frontend:latest
+    container_name: angular-frontend
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+    restart: always
+    ports:
+      - "80:80"     # Để redirect 301 sang 8443
+      - "443:443" # Port HTTPS chính trên GCP
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./certs:/etc/nginx/ssl:ro
+    networks:
+      - frontend-net
+
+  watchtower:
+    image: containrrr/watchtower:latest
+    container_name: watchtower-frontend
+    restart: always
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      WATCHTOWER_LABEL_ENABLE: "true"
+      WATCHTOWER_CLEANUP: "true"
+      WATCHTOWER_POLL_INTERVAL: 3600
+    networks:
+      - frontend-net
+
+networks:
+  frontend-net:
+    driver: bridge

@@ -1,0 +1,36 @@
+name: Deploy Frontend to GCP
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - 'frontend/**' # Chỉ chạy khi có thay đổi trong folder frontend
+      - '.github/workflows/frontend-gcp.yml' # Khi sửa chính logic deploy của nó
+
+jobs:
+  deploy-frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Copy Config to GCP
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.GCP_HOST }}
+          username: ${{ secrets.GCP_USER }}
+          key: ${{ secrets.GCP_SSH_KEY }}
+          source: "frontend/*"
+          target: "~/alex-deployment/"
+          strip_components: 1 # Để đẩy file trực tiếp vào ~/alex-deployment/
+
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.GCP_HOST }}
+          username: ${{ secrets.GCP_USER }}
+          key: ${{ secrets.GCP_SSH_KEY }}
+          script: |
+            cd ~/alex-deployment
+            docker compose pull
+            docker compose up -d --remove-orphans
